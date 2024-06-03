@@ -251,13 +251,14 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
         List<BlogVO1> blogVO1List = blogPage.getRecords().stream().map((blog) -> {
             BlogVO1 blogVO1 = new BlogVO1();
             BeanUtils.copyProperties(blog, blogVO1);
+            Long blogUserId = blog.getUserId();
             if (userId != null) {
                 LambdaQueryWrapper<BlogLike> blogLikeLambdaQueryWrapper = new LambdaQueryWrapper<>();
                 blogLikeLambdaQueryWrapper.eq(BlogLike::getBlogId, blog.getId()).eq(BlogLike::getUserId, userId);
                 long count = blogLikeService.count(blogLikeLambdaQueryWrapper);
                 blogVO1.setIsLike(count > 0);
                 LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
-                userLambdaQueryWrapper.eq(User::getId, userId);
+                userLambdaQueryWrapper.eq(User::getId, blogUserId);
                 User user = userService.getOne(userLambdaQueryWrapper);
                 blogVO1.setProfile(user.getProfile());
                 blogVO1.setUsername(user.getUsername());
