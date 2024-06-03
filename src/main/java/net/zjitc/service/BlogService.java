@@ -7,12 +7,13 @@ import net.zjitc.model.domain.User;
 import net.zjitc.model.request.BlogAddRequest;
 import net.zjitc.model.request.BlogUpdateRequest;
 import net.zjitc.model.vo.BlogVO;
+import net.zjitc.model.vo.BlogVO1;
 
 /**
-* @author OchiaMalu
-* @description 针对表【blog】的数据库操作Service
-* @createDate 2023-06-03 15:54:34
-*/
+ * @author OchiaMalu
+ * @description 针对表【blog】的数据库操作Service
+ * @createDate 2023-06-03 15:54:34
+ */
 public interface BlogService extends IService<Blog> {
 
     /**
@@ -49,7 +50,7 @@ public interface BlogService extends IService<Blog> {
      * @param id          id
      * @return {@link Page}<{@link BlogVO}>
      */
-    Page<BlogVO> pageBlog(long currentPage, String title, Long id);
+    Page<BlogVO1> pageBlog(long currentPage, String title, Long id);
 
     /**
      * 收到博客通过id

@@ -11,7 +11,7 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/super?serverTimezone=Asia/Shanghai
     username: root
-    password: liusen123
+    password: abc123
   redis:
     host: localhost
     port: 6379

@@ -14,6 +14,7 @@ import net.zjitc.model.domain.User;
 import net.zjitc.model.request.BlogAddRequest;
 import net.zjitc.model.request.BlogUpdateRequest;
 import net.zjitc.model.vo.BlogVO;
+import net.zjitc.model.vo.BlogVO1;
 import net.zjitc.service.BlogService;
 import net.zjitc.service.UserService;
 import org.apache.commons.lang3.StringUtils;
@@ -64,7 +65,7 @@ public class BlogController {
     @ApiImplicitParams(
             {@ApiImplicitParam(name = "currentPage", value = "当前页"),
                     @ApiImplicitParam(name = "request", value = "request请求")})
-    public BaseResponse<Page<BlogVO>> listBlogPage(long currentPage, String title, HttpServletRequest request) {
+    public BaseResponse<Page<BlogVO1>> listBlogPage(long currentPage, String title, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             return ResultUtils.success(blogService.pageBlog(currentPage, title, null));
