@@ -16,6 +16,7 @@ import net.zjitc.model.enums.MessageTypeEnum;
 import net.zjitc.model.request.BlogAddRequest;
 import net.zjitc.model.request.BlogUpdateRequest;
 import net.zjitc.model.vo.BlogVO;
+import net.zjitc.model.vo.BlogVO1;
 import net.zjitc.model.vo.UserVO;
 import net.zjitc.properties.SuperProperties;
 import net.zjitc.service.BlogLikeService;
@@ -240,28 +241,51 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
     }
 
     @Override
-    public Page<BlogVO> pageBlog(long currentPage, String title, Long userId) {
+    public Page<BlogVO1> pageBlog(long currentPage, String title, Long userId) {
         LambdaQueryWrapper<Blog> blogLambdaQueryWrapper = new LambdaQueryWrapper<>();
         blogLambdaQueryWrapper.like(StringUtils.isNotBlank(title), Blog::getTitle, title);
         blogLambdaQueryWrapper.orderBy(true, false, Blog::getCreateTime);
         Page<Blog> blogPage = this.page(new Page<>(currentPage, PAGE_SIZE), blogLambdaQueryWrapper);
-        Page<BlogVO> blogVoPage = new Page<>();
-        BeanUtils.copyProperties(blogPage, blogVoPage);
-        List<BlogVO> blogVOList = blogPage.getRecords().stream().map((blog) -> {
-            BlogVO blogVO = new BlogVO();
-            BeanUtils.copyProperties(blog, blogVO);
+        Page<BlogVO1> blogVO1Page = new Page<>();
+        BeanUtils.copyProperties(blogPage, blogVO1Page);
+        List<BlogVO1> blogVO1List = blogPage.getRecords().stream().map((blog) -> {
+            BlogVO1 blogVO1 = new BlogVO1();
+            BeanUtils.copyProperties(blog, blogVO1);
             if (userId != null) {
                 LambdaQueryWrapper<BlogLike> blogLikeLambdaQueryWrapper = new LambdaQueryWrapper<>();
                 blogLikeLambdaQueryWrapper.eq(BlogLike::getBlogId, blog.getId()).eq(BlogLike::getUserId, userId);
                 long count = blogLikeService.count(blogLikeLambdaQueryWrapper);
-                blogVO.setIsLike(count > 0);
+                blogVO1.setIsLike(count > 0);
+                LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+                userLambdaQueryWrapper.eq(User::getId, userId);
+                User user = userService.getOne(userLambdaQueryWrapper);
+                blogVO1.setProfile(user.getProfile());
+                blogVO1.setUsername(user.getUsername());
+                blogVO1.setAvatarUrl(user.getAvatarUrl());
             }
-            return blogVO;
+            return blogVO1;
         }).collect(Collectors.toList());
-        List<BlogVO> blogWithCoverImg = getCoverImg(blogVOList);
-        blogVoPage.setRecords(blogWithCoverImg);
-        return blogVoPage;
+        List<BlogVO1> blogWithCoverImg = getCoverImg1(blogVO1List);
+        blogVO1Page.setRecords(blogWithCoverImg);
+        return blogVO1Page;
+
     }
+//        Page<BlogVO> blogVoPage = new Page<>();
+//        BeanUtils.copyProperties(blogPage, blogVoPage);
+//        List<BlogVO> blogVOList = blogPage.getRecords().stream().map((blog) -> {
+//            BlogVO blogVO = new BlogVO();
+//            BeanUtils.copyProperties(blog, blogVO);
+//            if (userId != null) {
+//                LambdaQueryWrapper<BlogLike> blogLikeLambdaQueryWrapper = new LambdaQueryWrapper<>();
+//                blogLikeLambdaQueryWrapper.eq(BlogLike::getBlogId, blog.getId()).eq(BlogLike::getUserId, userId);
+//                long count = blogLikeService.count(blogLikeLambdaQueryWrapper);
+//                blogVO.setIsLike(count > 0);
+//            }
+//            return blogVO;
+//        }).collect(Collectors.toList());
+//        List<BlogVO> blogWithCoverImg = getCoverImg(blogVOList);
+//        blogVoPage.setRecords(blogWithCoverImg);
+//        return blogVoPage;
 
     @Override
     public BlogVO getBlogById(long blogId, Long userId) {
@@ -389,6 +413,29 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
             }
         }
         return blogVOList;
+    }
+
+    /**
+     * 获取封面img
+     *
+     * @param blogVO1List 博客volist
+     * @return {@link List}<{@link BlogVO}>
+     */
+    private List<BlogVO1> getCoverImg1(List<BlogVO1> blogVO1List) {
+        for (BlogVO1 blogVO1 : blogVO1List) {
+            String images = blogVO1.getImages();
+            if (images == null) {
+                continue;
+            }
+            String[] imgStr = images.split(",");
+            if (superProperties.isUseLocalStorage()) {
+                String fileUrl = "http://" + host + ":" + port + "/api/common/image/" + imgStr[0];
+                blogVO1.setCoverImage(fileUrl);
+            } else {
+                blogVO1.setCoverImage(qiniuUrl + imgStr[0]);
+            }
+        }
+        return blogVO1List;
     }
 }
 
